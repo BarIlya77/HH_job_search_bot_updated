@@ -68,6 +68,38 @@ class SenderWorker:
             else:
                 print("❌ Неверный выбор, попробуйте еще раз")
 
+
+    async def process_cover_letter_automatic(self, cover_data: dict) -> bool:
+        """Автоматическая обработка отклика"""
+        logger.info(f"\n🎯 АВТОМАТИЧЕСКАЯ ОТПРАВКА")
+        logger.info(f"🏢 {cover_data['company']} - {cover_data['vacancy_name']}")
+
+        # RateLimiter САМ рассчитает нужную задержку на основе REQUESTS_PER_HOUR
+        await self.rate_limiter.wait_if_needed()
+
+        if await self.should_skip_vacancy(cover_data):
+            return False
+
+        # Отправляем отклик
+        vacancy_id_str = str(cover_data['vacancy_id']).strip()
+        success = await self.hh_responder.send_application(
+            vacancy_id_str,
+            cover_data['cover_letter']
+        )
+
+        if success:
+            self.sent_count += 1
+            vacancy = await db.get_vacancy_by_hh_id(cover_data['vacancy_id'])
+            if vacancy:
+                await db.mark_as_applied(vacancy.id)
+            logger.info(f"✅ Отклик #{self.sent_count} отправлен")
+            return True
+        else:
+            self.error_count += 1
+            logger.error(f"❌ Ошибка отправки (#{self.error_count})")
+            return False
+
+
     async def process_cover_letter(self, message: aio_pika.IncomingMessage):
         """Обрабатывает сообщение с готовым письмом и отправляет отклик"""
         async with message.process():
@@ -78,8 +110,14 @@ class SenderWorker:
                 logger.info(f"\n📨 Обработка отклика: {cover_data['vacancy_name']}")
                 logger.info(f"🏢 Компания: {cover_data['company']}")
 
-                # Спрашиваем подтверждение
-                choice = await self.ask_confirmation(cover_data)
+                # # Спрашиваем подтверждение
+                # choice = await self.ask_confirmation(cover_data)
+                if settings.BOT_MODE == "automatic":
+                    # АВТОМАТИЧЕСКИЙ РЕЖИМ - отправляем сразу
+                    await self.process_cover_letter_automatic(cover_data)
+                else:
+                    # ИНТЕРАКТИВНЫЙ РЕЖИМ - спрашиваем подтверждение
+                    choice = await self.ask_confirmation(cover_data)
 
                 if choice in ['n', 's']:
                     # Если пользователь отказался

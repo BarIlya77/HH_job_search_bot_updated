@@ -1,0 +1,16 @@
+# /etc/systemd/system/hh-bot.service
+[Unit]
+Description=HH Job Bot - Autonomous Job Search Bot
+After=network.target
+
+[Service]
+Type=simple
+User=ilya
+WorkingDirectory=/home/ilya/PycharmProjects/HH_job_search_bot_updated
+ExecStart=/usr/bin/python3 /home/ilya/PycharmProjects/HH_job_search_bot_updated/main.py worker sender
+Restart=always
+RestartSec=10
+Environment=PYTHONPATH=/home/ilya/PycharmProjects/HH_job_search_bot_updated/src
+
+[Install]
+WantedBy=multi-user.target

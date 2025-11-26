@@ -60,6 +60,9 @@ class Settings(BaseSettings):
     CONTACT_PHONE: str = "+7 902 801 68 14"
     CONTACT_GITHUB: str = "https://github.com/BarIlya77"
 
+    # 🤖 Режим работы бота
+    BOT_MODE: str = os.getenv("BOT_MODE", "automatic")  # automatic или interactive
+
     # 🎨 Logging
     LOG_LEVEL: str = "INFO"
     COLORED_LOGS: bool = True
