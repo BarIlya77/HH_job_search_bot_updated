@@ -70,11 +70,20 @@ class SenderWorker:
 
 
     async def process_cover_letter_automatic(self, cover_data: dict) -> bool:
-        """Автоматическая обработка отклика"""
-        logger.info(f"\n🎯 АВТОМАТИЧЕСКАЯ ОТПРАВКА")
+        """Автоматическая отправка без подтверждения"""
+        logger.info(f"🎯 АВТОМАТИЧЕСКАЯ ОТПРАВКА")
         logger.info(f"🏢 {cover_data['company']} - {cover_data['vacancy_name']}")
+        logger.info(f"🔗 {cover_data['url']}")
 
-        # RateLimiter САМ рассчитает нужную задержку на основе REQUESTS_PER_HOUR
+        # 🔧 ПРОВЕРКА НА ПРОПУСК
+        if await self.should_skip_vacancy(cover_data):
+            logger.info("⏩ Вакансия пропущена по правилам")
+            return False
+
+        # 🔧 ЗАДЕРЖКА
+        logger.info("⏳ Подготовка к отправке...")
+        await asyncio.sleep(10)
+
         await self.rate_limiter.wait_if_needed()
 
         if await self.should_skip_vacancy(cover_data):
