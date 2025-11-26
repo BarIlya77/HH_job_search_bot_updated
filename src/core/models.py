@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, Float
 from sqlalchemy.ext.declarative import declarative_base
-from datetime import datetime, UTC
+from datetime import datetime, UTC, timezone
 
 Base = declarative_base()
 
@@ -30,7 +30,7 @@ class Vacancy(Base):
     applied = Column(Boolean, default=False)
     applied_at = Column(DateTime)
 
-    created_at = Column(DateTime, default=datetime.now(UTC))
+    created_at = Column(DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return f"<Vacancy(id={self.id}, name='{self.name}', company='{self.company}')>"
