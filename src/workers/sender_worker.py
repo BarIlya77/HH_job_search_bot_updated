@@ -75,11 +75,6 @@ class SenderWorker:
         logger.info(f"🏢 {cover_data['company']} - {cover_data['vacancy_name']}")
         logger.info(f"🔗 {cover_data['url']}")
 
-        # 🔧 ПРОВЕРКА НА ПРОПУСК
-        if await self.should_skip_vacancy(cover_data):
-            logger.info("⏩ Вакансия пропущена по правилам")
-            return False
-
         # 🔧 ЗАДЕРЖКА
         logger.info("⏳ Подготовка к отправке...")
         await asyncio.sleep(10)
