@@ -1,11 +1,10 @@
+# src/workers/sender_worker.py
 import asyncio
 import aio_pika
 import json
 import time
-from datetime import datetime
 from src.core.database import db
 from src.api.hh_responder import HHResponder
-from src.services.queue_manager import RabbitMQManager
 from src.services.rate_limiter import RateLimiter
 from src.core.config import settings
 from src.core.logger import get_logger
@@ -17,9 +16,10 @@ class SenderWorker:
     """Воркер для отправки откликов на HH.ru"""
 
     def __init__(self):
-        self.rabbitmq = RabbitMQManager()
         self.rate_limiter = RateLimiter(settings.REQUESTS_PER_HOUR)
         self.hh_responder = HHResponder()
+        self.sent_count = 0
+        self.error_count = 0
 
     async def ask_confirmation(self, cover_data: dict) -> str:
         """Спрашивает подтверждение перед отправкой отклика"""
@@ -68,7 +68,6 @@ class SenderWorker:
             else:
                 print("❌ Неверный выбор, попробуйте еще раз")
 
-
     async def process_cover_letter_automatic(self, cover_data: dict) -> bool:
         """Автоматическая отправка без подтверждения"""
         logger.info(f"🎯 АВТОМАТИЧЕСКАЯ ОТПРАВКА")
@@ -80,9 +79,6 @@ class SenderWorker:
         await asyncio.sleep(10)
 
         await self.rate_limiter.wait_if_needed()
-
-        if await self.should_skip_vacancy(cover_data):
-            return False
 
         # Отправляем отклик
         vacancy_id_str = str(cover_data['vacancy_id']).strip()
@@ -103,126 +99,131 @@ class SenderWorker:
             logger.error(f"❌ Ошибка отправки (#{self.error_count})")
             return False
 
-
-    async def process_cover_letter(self, message: aio_pika.IncomingMessage):
-        """Обрабатывает сообщение с готовым письмом и отправляет отклик"""
+    async def process_message(self, message: aio_pika.IncomingMessage):
+        """Обработчик сообщений - простой и надежный как в simple_worker_v2.py"""
         async with message.process():
             try:
-                cover_data = json.loads(message.body.decode('utf-8'))
+                # 🔧 ПРОСТАЯ И РАБОЧАЯ ОБРАБОТКА КАК В simple_worker_v2.py
+                body = message.body.decode('utf-8')
+                cover_data = json.loads(body)
 
-                # Логируем информацию о вакансии
                 logger.info(f"\n📨 Обработка отклика: {cover_data['vacancy_name']}")
                 logger.info(f"🏢 Компания: {cover_data['company']}")
 
-                # # Спрашиваем подтверждение
-                # choice = await self.ask_confirmation(cover_data)
                 if settings.BOT_MODE == "automatic":
-                    # АВТОМАТИЧЕСКИЙ РЕЖИМ - отправляем сразу
+                    # АВТОМАТИЧЕСКИЙ РЕЖИМ
                     await self.process_cover_letter_automatic(cover_data)
                 else:
-                    # ИНТЕРАКТИВНЫЙ РЕЖИМ - спрашиваем подтверждение
+                    # ИНТЕРАКТИВНЫЙ РЕЖИМ
                     choice = await self.ask_confirmation(cover_data)
 
-                if choice in ['n', 's']:
-                    # Если пользователь отказался
-                    if choice == 'n':
-                        logger.info("🚫 Отклик пропущен и удален из очереди")
-                    else:
-                        logger.info("⏩ Вакансия оставлена в очереди")
-                        # Возвращаем сообщение в очередь
-                        await message.nack(requeue=True)
-                    return
+                    if choice in ['n', 's']:
+                        if choice == 'n':
+                            logger.info("🚫 Отклик пропущен и удален из очереди")
+                        else:
+                            logger.info("⏩ Вакансия оставлена в очереди")
+                            await message.nack(requeue=True)
+                        return
 
-                # Обработка отправки
-                if choice == 'w':
-                    # Соблюдаем лимиты HH.ru
-                    logger.info("⏳ Ожидание соблюдения лимитов...")
-                    await self.rate_limiter.wait_if_needed()
-                else:  # choice == 'y'
-                    logger.info("🚀 Отправка СЕЙЧАС (без ожидания)")
-                    # Сбрасываем таймер для немедленной отправки
-                    self.rate_limiter.last_request = 0
-
-                # Отправляем отклик
-                vacancy_id_str = str(cover_data['vacancy_id']).strip()
-                logger.info("🔄 Отправка отклика...")
-
-                success = await self.hh_responder.send_application(
-                    vacancy_id_str,
-                    cover_data['cover_letter']
-                )
-
-                if success:
-                    # ✅ ТОЛЬКО ПРИ УСПЕШНОЙ ОТПРАВКЕ обновляем таймер
+                    # Обработка отправки
                     if choice == 'w':
-                        # Для режима с ожиданием таймер уже обновлен в wait_if_needed()
-                        pass
-                    else:
-                        # Для режима "сейчас" обновляем таймер после успешной отправки
-                        self.rate_limiter.last_request = time.time()
+                        logger.info("⏳ Ожидание соблюдения лимитов...")
+                        await self.rate_limiter.wait_if_needed()
+                    else:  # choice == 'y'
+                        logger.info("🚀 Отправка СЕЙЧАС (без ожидания)")
+                        self.rate_limiter.last_request = 0
 
-                    # Помечаем как отправленную в БД
-                    vacancy = await db.get_vacancy_by_hh_id(cover_data['vacancy_id'])
-                    if vacancy:
-                        await db.mark_as_applied(vacancy.id)
-                        logger.info(f"✅ Отклик отправлен и записан в БД")
+                    # Отправляем отклик
+                    vacancy_id_str = str(cover_data['vacancy_id']).strip()
+                    logger.info("🔄 Отправка отклика...")
+
+                    success = await self.hh_responder.send_application(
+                        vacancy_id_str,
+                        cover_data['cover_letter']
+                    )
+
+                    if success:
+                        if choice != 'w':  # Для режима "сейчас" обновляем таймер
+                            self.rate_limiter.last_request = time.time()
+
+                        # Помечаем как отправленную в БД
+                        vacancy = await db.get_vacancy_by_hh_id(cover_data['vacancy_id'])
+                        if vacancy:
+                            await db.mark_as_applied(vacancy.id)
+                            logger.info(f"✅ Отклик отправлен и записан в БД")
+                        else:
+                            logger.warning(f"⚠️ Отклик отправлен, но вакансия не найдена в БД")
                     else:
-                        logger.warning(f"⚠️ Отклик отправлен, но вакансия не найдена в БД")
-                else:
-                    logger.error(f"❌ Не удалось отправить отклик")
-                    # ❌ ПРИ ОШИБКЕ НЕ ОБНОВЛЯЕМ ТАЙМЕР - можно попробовать снова
+                        logger.error(f"❌ Не удалось отправить отклик")
 
             except json.JSONDecodeError as e:
                 logger.error(f"❌ Ошибка декодирования JSON: {e}")
             except Exception as e:
                 logger.error(f"❌ Ошибка обработки письма: {e}")
+                import traceback
+                logger.error(f"📋 Traceback: {traceback.format_exc()}")
 
     async def main(self):
-        """Основная функция воркера"""
+        """Основная функция воркера - простая как в simple_worker_v2.py"""
         logger.info("🚀 Запуск воркера отправки откликов...")
-        logger.info("💡 Режим: ИНТЕРАКТИВНЫЙ (требует подтверждение для каждого отклика)")
+        logger.info(f"💡 Режим: {settings.BOT_MODE.upper()}")
         logger.info(f"⚠️  ВНИМАНИЕ: Rate limiting активирован ({settings.REQUESTS_PER_HOUR} откликов/час)")
-        logger.info("🎯 Доступные режимы отправки:")
-        logger.info("   [y] - СЕЙЧАС (игнорирует лимиты)")
-        logger.info("   [w] - С ожиданием (соблюдает лимиты)")
+
+        if settings.BOT_MODE != "automatic":
+            logger.info("🎯 Доступные режимы отправки:")
+            logger.info("   [y] - СЕЙЧАС (игнорирует лимиты)")
+            logger.info("   [w] - С ожиданием (соблюдает лимиты)")
 
         # Инициализация БД
         await db.create_tables()
 
-        # Подключение к RabbitMQ
-        if not await self.rabbitmq.connect():
-            logger.error("❌ Не удалось подключиться к RabbitMQ")
-            return
+        connection = None
+        max_retries = 3
 
-        try:
-            # Настраиваем канал
-            await self.rabbitmq.channel.set_qos(prefetch_count=1)
+        for attempt in range(max_retries):
+            try:
+                # 🔧 ПРОСТОЕ ПОДКЛЮЧЕНИЕ КАК В simple_worker_v2.py
+                logger.info(f"🔌 Попытка подключения к RabbitMQ ({attempt + 1}/{max_retries})...")
+                connection = await aio_pika.connect_robust(settings.RABBITMQ_URL)
+                channel = await connection.channel()
+                await channel.set_qos(prefetch_count=1)
 
-            # Получаем очередь
-            queue = await self.rabbitmq.channel.declare_queue(
-                settings.QUEUE_COVER_LETTERS,
-                durable=True
-            )
+                # Получаем очередь
+                queue = await channel.declare_queue(settings.QUEUE_COVER_LETTERS, durable=True)
 
-            logger.info("✅ Подключение к RabbitMQ установлено")
-            logger.info(f"🔄 Ожидание писем в очереди '{settings.QUEUE_COVER_LETTERS}'...")
+                logger.info("✅ Подключение к RabbitMQ установлено")
+                logger.info(f"🔄 Ожидание писем в очереди '{settings.QUEUE_COVER_LETTERS}'...")
 
-            # Начинаем слушать очередь
-            await queue.consume(self.process_cover_letter)
+                # Начинаем слушать очередь
+                await queue.consume(self.process_message)
 
-            logger.info("\n🎯 ВОРКЕР ОТПРАВКИ ЗАПУЩЕН!")
-            logger.info("💡 Для каждого отклика будет запрашиваться подтверждение")
-            logger.info("⏹️  Нажмите Ctrl+C для остановки")
+                logger.info("\n🎯 ВОРКЕР ОТПРАВКИ ЗАПУЩЕН!")
+                if settings.BOT_MODE == "automatic":
+                    logger.info("🤖 Режим: АВТОМАТИЧЕСКИЙ (без подтверждения)")
+                else:
+                    logger.info("💡 Режим: ИНТЕРАКТИВНЫЙ (требует подтверждение)")
+                logger.info("⏹️  Нажмите Ctrl+C для остановки")
 
-            # Бесконечное ожидание
-            await asyncio.Future()
+                # Бесконечное ожидание
+                await asyncio.Future()
 
-        except KeyboardInterrupt:
-            logger.info("\n🛑 Остановка воркера отправки...")
-        except Exception as e:
-            logger.error(f"❌ Ошибка: {e}")
-        finally:
-            await self.rabbitmq.close()
+            except aio_pika.exceptions.AMQPConnectionError as e:
+                logger.error(f"❌ Ошибка подключения: {e}")
+                if attempt < max_retries - 1:
+                    logger.info("🔄 Повторная попытка через 10 секунд...")
+                    await asyncio.sleep(10)
+                else:
+                    logger.error("❌ Не удалось подключиться после всех попыток")
+                    break
+            except KeyboardInterrupt:
+                logger.info("\n🛑 Остановка воркера отправки...")
+                break
+            except Exception as e:
+                logger.error(f"❌ Неожиданная ошибка: {e}")
+                break
+            finally:
+                if connection:
+                    await connection.close()
 
 
 # Функция для запуска
