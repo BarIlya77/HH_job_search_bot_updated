@@ -58,7 +58,7 @@ class Settings(BaseSettings):
     CONTACT_TELEGRAM: str = "@barilya"
     CONTACT_EMAIL: str = "barilya77@gmail.com"
     CONTACT_PHONE: str = "+7 902 801 68 14"
-    CONTACT_GITHUB: str = "https://github.com/BarIlya77"
+    CONTACT_GITHUB: str = "https://github.com/BarIlya77/HH_job_search_bot_updated"
 
     # 🤖 Режим работы бота
     BOT_MODE: str = os.getenv("BOT_MODE", "automatic")  # automatic или interactive
