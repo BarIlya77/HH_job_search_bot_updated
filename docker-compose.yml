@@ -1,44 +1,36 @@
+version: '3.8'  # ✅ оставляем эту версию - она поддерживается
 services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_DB: ${DB_NAME:-hh_bot}
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: hh_bot
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3-management-alpine
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   search-worker:
     build: .
     command: python -m src.workers.search_worker
     env_file: .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:password@postgres:5432/hh_bot
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
     depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+      - postgres
+      - rabbitmq
     networks:
       - app-network
     restart: unless-stopped
@@ -47,11 +39,12 @@ services:
     build: .
     command: python -m src.workers.vacancy_worker
     env_file: .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:password@postgres:5432/hh_bot
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
     depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+      - postgres
+      - rabbitmq
     networks:
       - app-network
     restart: unless-stopped
@@ -60,11 +53,12 @@ services:
     build: .
     command: python -m src.workers.sender_worker
     env_file: .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:password@postgres:5432/hh_bot
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
     depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+      - postgres
+      - rabbitmq
     networks:
       - app-network
     restart: unless-stopped
@@ -75,4 +69,3 @@ volumes:
 
 networks:
   app-network:
-    driver: bridge
