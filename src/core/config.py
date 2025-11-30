@@ -54,11 +54,11 @@ class Settings(BaseSettings):
     ]
 
     # 📧 Контакты для писем
-    CONTACT_NAME: str = "Илья Баранов"
-    CONTACT_TELEGRAM: str = "@barilya"
-    CONTACT_EMAIL: str = "barilya77@gmail.com"
-    CONTACT_PHONE: str = "+7 902 801 68 14"
-    CONTACT_GITHUB: str = "https://github.com/BarIlya77/HH_job_search_bot_updated"
+    CONTACT_NAME: str = os.getenv("CONTACT_NAME", "")
+    CONTACT_TELEGRAM: str = os.getenv("CONTACT_TELEGRAM", "")
+    CONTACT_EMAIL: str = os.getenv("CONTACT_EMAIL", "")
+    CONTACT_PHONE: str = os.getenv("CONTACT_PHONE", "")
+    CONTACT_GITHUB: str = os.getenv("CONTACT_GITHUB", "")
 
     # 🤖 Режим работы бота
     BOT_MODE: str = os.getenv("BOT_MODE", "automatic")  # automatic или interactive
