@@ -1,4 +1,3 @@
-# src/core/config.py
 from pydantic_settings import BaseSettings
 from typing import List, Dict, Any, Optional
 import os
@@ -26,12 +25,10 @@ class Settings(BaseSettings):
     DEEPSEEK_API_URL: str = "https://api.deepseek.com/v1/chat/completions"
 
     # 🗃️ Database
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///vacancies.db")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
 
     # 📨 RabbitMQ
-    # Подключение к RabbitMQ
     RABBITMQ_URL: str = os.getenv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")
-    # Названия очередей
     QUEUE_VACANCIES: str = "vacancies_to_process"
     QUEUE_COVER_LETTERS: str = "cover_letters_to_send"
 
