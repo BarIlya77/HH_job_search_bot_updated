@@ -1,4 +1,3 @@
-version: '3.8'  # ✅ оставляем эту версию - она поддерживается
 services:
   postgres:
     image: postgres:15
@@ -22,7 +21,9 @@ services:
       - app-network
 
   search-worker:
-    build: .
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     command: python -m src.workers.search_worker
     env_file: .env
     environment:
@@ -36,7 +37,9 @@ services:
     restart: unless-stopped
 
   process-worker:
-    build: .
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     command: python -m src.workers.vacancy_worker
     env_file: .env
     environment:
@@ -50,7 +53,9 @@ services:
     restart: unless-stopped
 
   send-worker:
-    build: .
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     command: python -m src.workers.sender_worker
     env_file: .env
     environment:

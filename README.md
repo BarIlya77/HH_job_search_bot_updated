@@ -26,7 +26,18 @@ python -m src.workers.vacancy_worker     # Обработка
 python -m src.workers.sender_worker      # Отправка
 ```
 ## 3. Запуск в Docker
+
+### Настройка симлинка (если Docker файлы в папке docker)
+
 ```bash
+# Создание симлинка для удобного запуска
+ln -s docker/docker-compose.yml docker-compose.yml
+
+# Проверка
+ls -la docker-compose.yml
+# Должно показать: docker-compose.yml -> docker/docker-compose.yml
+
+
 docker-compose up -d
 
 # Проверка статуса
