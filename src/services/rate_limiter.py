@@ -30,7 +30,7 @@ class RateLimiter:
         if time_since_last < self.delay:
             wait_time = self.delay - time_since_last
 
-            # Красивый обратный отсчёт
+            # обратный отсчёт
             minutes = int(wait_time // 60)
             seconds = int(wait_time % 60)
             logger.info(f"⏳ Отправка через: {minutes:02d}:{seconds:02d}")

@@ -33,13 +33,15 @@ class Settings(BaseSettings):
     QUEUE_COVER_LETTERS: str = "cover_letters_to_send"
 
     # ⚡ Rate Limits
-    REQUESTS_PER_HOUR: int = 5  # Откликов в час
+    REQUESTS_PER_HOUR: int = 15  # Откликов в час
     SEARCH_REQUESTS_PER_HOUR: int = 10  # Поисковых запросов в час
     MAX_CONCURRENT_REQUESTS: int = 2
     REQUEST_DELAY: float = 0.3
 
     # 🔍 Search Parameters
     SEARCH_QUERY: str = "Python разработчик OR Python developer OR backend Python"
+    SEARCH_EMPLOYMENT: str = "remote,full,part"  # Удалёнка, полная, частичная
+    SEARCH_SCHEDULE: str = "remote,flexible"
     SEARCH_AREAS: List[int] = [1, 2, 113]  # Москва, СПб, Россия
     SEARCH_PER_PAGE: int = 20
     SEARCH_INTERVAL: int = 3600  # 1 час

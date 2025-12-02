@@ -1,4 +1,3 @@
-# src/workers/vacancy_worker.py
 import asyncio
 import aio_pika
 import json

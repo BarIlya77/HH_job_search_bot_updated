@@ -1,4 +1,3 @@
-# src/services/queue_manager.py
 import aio_pika
 import json
 import asyncio
@@ -123,21 +122,8 @@ class RabbitMQManager:
             queue_letters = await self.channel.declare_queue(settings.QUEUE_COVER_LETTERS, passive=True)
             stats[settings.QUEUE_COVER_LETTERS] = queue_letters.declaration_result.message_count
 
-            # # Получаем очередь вакансий
-            # queue_vacancies = await self.channel.declare_queue(settings.QUEUE_VACANCIES, passive=True)
-            # stats[settings.QUEUE_VACANCIES] = queue_vacancies.message_count
-            #
-            # # Получаем очередь писем
-            # queue_letters = await self.channel.declare_queue(settings.QUEUE_COVER_LETTERS, passive=True)
-            # stats[settings.QUEUE_COVER_LETTERS] = queue_letters.message_count
-
             return stats
 
         except Exception as e:
             logger.error(f"❌ Ошибка получения статистики очередей: {e}")
             return {}
-
-# src/services/queue_manager.py (добавляем свойство)
-
-
-                # ... остальной код без изменений ...

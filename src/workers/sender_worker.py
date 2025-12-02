@@ -1,4 +1,3 @@
-# src/workers/sender_worker.py
 import asyncio
 import aio_pika
 import json
@@ -103,7 +102,6 @@ class SenderWorker:
         """Обработчик сообщений - простой и надежный как в simple_worker_v2.py"""
         async with message.process():
             try:
-                # 🔧 ПРОСТАЯ И РАБОЧАЯ ОБРАБОТКА КАК В simple_worker_v2.py
                 body = message.body.decode('utf-8')
                 cover_data = json.loads(body)
 
@@ -182,7 +180,7 @@ class SenderWorker:
 
         for attempt in range(max_retries):
             try:
-                # 🔧 ПРОСТОЕ ПОДКЛЮЧЕНИЕ КАК В simple_worker_v2.py
+                # 🔧  подключение к RabbitMQ
                 logger.info(f"🔌 Попытка подключения к RabbitMQ ({attempt + 1}/{max_retries})...")
                 connection = await aio_pika.connect_robust(settings.RABBITMQ_URL)
                 channel = await connection.channel()
