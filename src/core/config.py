@@ -34,7 +34,7 @@ class Settings(BaseSettings):
 
     #  Rate Limits
     REQUESTS_PER_HOUR: int = 15  # Откликов в час
-    SEARCH_REQUESTS_PER_HOUR: int = 10  # Поисковых запросов в час
+    SEARCH_REQUESTS_PER_HOUR: int = 2  # Поисковых запросов в час
     MAX_CONCURRENT_REQUESTS: int = 2
     REQUEST_DELAY: float = 0.3
 
