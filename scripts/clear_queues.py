@@ -20,17 +20,17 @@ async def clear_queues():
     
     if await rabbitmq.connect():
         try:
-            # ✅ получаем очередь и вызываем purge()
+            # получаем очередь и вызываем purge()
             queue_letters = await rabbitmq.channel.declare_queue(settings.QUEUE_COVER_LETTERS, passive=True)
             await queue_letters.purge()
-            logger.info("✅ Очередь писем очищена")
+            logger.info("Очередь писем очищена")
             
             queue_vacancies = await rabbitmq.channel.declare_queue(settings.QUEUE_VACANCIES, passive=True) 
             await queue_vacancies.purge()
-            logger.info("✅ Очередь вакансий очищена")
+            logger.info("Очередь вакансий очищена")
             
         except Exception as e:
-            logger.error(f"❌ Ошибка очистки: {e}")
+            logger.error(f"Ошибка очистки: {e}")
         finally:
             await rabbitmq.close()
 

@@ -24,8 +24,8 @@ logger = get_logger(__name__)
 async def test_sqlite():
     """Тестирует подключение к SQLite"""
     # sqlite_path = Path("vacancies.db")
-    # logger.info(f"🔍 Ищем БД: {sqlite_path.absolute()}")
-    # logger.info(f"📁 Существует: {sqlite_path.exists()}")
+    # logger.info(f"Ищем БД: {sqlite_path.absolute()}")
+    # logger.info(f"Существует: {sqlite_path.exists()}")
     sqlite_vacancies = await sqlite_db.get_all_vacancies()
 
     if sqlite_vacancies:
@@ -36,15 +36,15 @@ async def test_sqlite():
             async with AsyncSession(engine) as session:
                 result = await session.execute(select(Vacancy))
                 vacancies = result.scalars().all()
-                logger.info(f"✅ Найдено вакансий: {len(vacancies)}")
+                logger.info(f"Найдено вакансий: {len(vacancies)}")
                 for v in vacancies[:3]:
                     logger.info(f"   - {v.name} ({v.company})")
         except Exception as e:
-            logger.error(f"❌ Ошибка: {e}")
+            logger.error(f"Ошибка: {e}")
         finally:
             await engine.dispose()
     else:
-        logger.error("❌ Файл БД не найден!")
+        logger.error("Файл БД не найден!")
 
 
 if __name__ == "__main__":

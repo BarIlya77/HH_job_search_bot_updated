@@ -16,7 +16,7 @@ class RateLimiter:
         self.last_request: float = 0
 
         logger.info(
-            f"⏰ Rate limiter настроен: {self.requests_per_hour} запросов/час (~{self.delay:.0f} сек между откликами)")
+            f"Rate limiter настроен: {self.requests_per_hour} запросов/час (~{self.delay:.0f} сек между откликами)")
 
     async def wait_if_needed(self) -> None:
         """Ждет если нужно соблюдать лимиты"""
@@ -33,18 +33,18 @@ class RateLimiter:
             # обратный отсчёт
             minutes = int(wait_time // 60)
             seconds = int(wait_time % 60)
-            logger.info(f"⏳ Отправка через: {minutes:02d}:{seconds:02d}")
+            logger.info(f"Отправка через: {minutes:02d}:{seconds:02d}")
 
             # Обновляем каждую секунду
             while wait_time > 0:
                 minutes = int(wait_time // 60)
                 seconds = int(wait_time % 60)
-                print(f"⏳ Отправка через: {minutes:02d}:{seconds:02d}", end='\r', flush=True)
+                print(f"Отправка через: {minutes:02d}:{seconds:02d}", end='\r', flush=True)
                 await asyncio.sleep(1)
                 wait_time -= 1
 
             print(" " * 50, end='\r')  # Очищаем строку
-            logger.info("🚀 Отправка сейчас!")
+            logger.info("Отправка сейчас!")
 
         self.last_request = time.time()
 

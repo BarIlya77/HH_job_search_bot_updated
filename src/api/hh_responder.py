@@ -38,7 +38,7 @@ class HHResponder:
         }
 
         # Логируем детали запроса
-        logger.info(f"📨 Отправка отклика на вакансию {vacancy_id}")
+        logger.info(f"Отправка отклика на вакансию {vacancy_id}")
         logger.debug(f"Заголовки: { {k: '***' if k == 'Authorization' else v for k, v in headers.items()} }")
         logger.debug(f"Данные: {data}")
 
@@ -50,23 +50,23 @@ class HHResponder:
                     logger.debug(f"Статус ответа: {response.status}, Тело: {response_text}")
 
                     if response.status == 201:
-                        logger.info(f"✅ Отклик успешно отправлен на вакансию {vacancy_id}")
+                        logger.info(f"Отклик успешно отправлен на вакансию {vacancy_id}")
                         return True
                     elif response.status == 403:
-                        logger.error(f"❌ Ошибка доступа (403): {response_text}")
+                        logger.error(f"Ошибка доступа (403): {response_text}")
                         return False
                     elif response.status == 429:
-                        logger.warning("⚠️ Превышен лимит запросов к API HH.ru")
+                        logger.warning("Превышен лимит запросов к API HH.ru")
                         return False
                     else:
-                        logger.error(f"❌ Ошибка {response.status}: {response_text}")
+                        logger.error(f"Ошибка {response.status}: {response_text}")
                         return False
 
         except aiohttp.ClientError as e:
-            logger.error(f"❌ Ошибка сети: {e}")
+            logger.error(f"Ошибка сети: {e}")
             return False
         except Exception as e:
-            logger.error(f"❌ Неожиданная ошибка: {e}")
+            logger.error(f"Неожиданная ошибка: {e}")
             return False
 
     async def check_application_status(self, vacancy_id: str) -> Optional[str]:
@@ -95,13 +95,13 @@ class HHResponder:
                     return None
 
         except Exception as e:
-            logger.error(f"❌ Ошибка проверки статуса: {e}")
+            logger.error(f"Ошибка проверки статуса: {e}")
             return None
 
     async def test_connection(self) -> bool:
         """Тестирует подключение к API HH.ru"""
         if not self.access_token:
-            logger.error("❌ HH_ACCESS_TOKEN не установлен")
+            logger.error("HH_ACCESS_TOKEN не установлен")
             return False
 
         headers = {
@@ -113,11 +113,11 @@ class HHResponder:
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"{self.base_url}/me", headers=headers) as response:
                     if response.status == 200:
-                        logger.info("✅ Подключение к HH.ru API успешно")
+                        logger.info("Подключение к HH.ru API успешно")
                         return True
                     else:
-                        logger.error(f"❌ Ошибка подключения: {response.status}")
+                        logger.error(f"Ошибка подключения: {response.status}")
                         return False
         except Exception as e:
-            logger.error(f"❌ Ошибка тестирования подключения: {e}")
+            logger.error(f"Ошибка тестирования подключения: {e}")
             return False

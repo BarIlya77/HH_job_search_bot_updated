@@ -27,7 +27,7 @@ class HHClient:
                 async with aiohttp.ClientSession(timeout=timeout) as session:
                     async with session.get(url, params=params) as response:
                         logger.info("=" * 50)
-                        logger.info(f"🔧 Параметры поиска: {params}")
+                        logger.info(f"Параметры поиска: {params}")
                         logger.info("=" * 50)
                         if response.status == 200:
                             return await response.json()
@@ -54,9 +54,9 @@ class HHClient:
         if custom_params:
             params.update(custom_params)
 
-        logger.info("🔍 Поиск вакансий с параметрами:")
+        logger.info("Поиск вакансий с параметрами:")
         for key, value in params.items():
-            logger.info(f"  {key}: {value}")
+            logger.info(f" {key}: {value}")
 
         result = await self._make_request(self.base_url, params)
 
@@ -149,11 +149,11 @@ class HHClient:
         try:
             result = await self._make_request(f"{self.base_url}/vacancies", {"per_page": 1})
             if result:
-                logger.success("✅ Подключение к HH.ru API успешно")
+                logger.success("Подключение к HH.ru API успешно")
                 return True
             else:
-                logger.error("❌ Ошибка подключения к HH.ru API")
+                logger.error("Ошибка подключения к HH.ru API")
                 return False
         except Exception as e:
-            logger.error(f"❌ Ошибка тестирования подключения: {e}")
+            logger.error(f"Ошибка тестирования подключения: {e}")
             return False

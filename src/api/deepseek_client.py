@@ -20,10 +20,10 @@ class DeepSeekClient:
         """Генерирует сопроводительное письмо только для Python-вакансий"""
         # Проверяем, подходит ли вакансия (только Python-разработка)
         if not self._is_python_vacancy(vacancy_data):
-            logger.info(f"⏩ Пропуск не-Python вакансии: {vacancy_data['name']}")
+            logger.info(f"Пропуск не-Python вакансии: {vacancy_data['name']}")
             return None
 
-        logger.info(f"🔧 Генерация письма для Python-вакансии: {vacancy_data['name']}")
+        logger.info(f"Генерация письма для Python-вакансии: {vacancy_data['name']}")
         return self._generate_python_letter(vacancy_data)
 
     def _is_python_vacancy(self, vacancy_data: dict) -> bool:
@@ -108,7 +108,7 @@ class DeepSeekClient:
     async def test_connection(self) -> bool:
         """Тестирует подключение к DeepSeek API"""
         if not self.api_key:
-            logger.error("❌ DEEPSEEK_API_KEY не установлен")
+            logger.error("DEEPSEEK_API_KEY не установлен")
             return False
 
         headers = {
@@ -126,11 +126,11 @@ class DeepSeekClient:
             async with aiohttp.ClientSession() as session:
                 async with session.post(self.api_url, headers=headers, json=data) as response:
                     if response.status in [200, 401]:  # 401 тоже ок - значит ключ работает
-                        logger.info("✅ Подключение к DeepSeek API успешно")
+                        logger.info("Подключение к DeepSeek API успешно")
                         return True
                     else:
-                        logger.error(f"❌ Ошибка подключения: {response.status}")
+                        logger.error(f"Ошибка подключения: {response.status}")
                         return False
         except Exception as e:
-            logger.error(f"❌ Ошибка тестирования подключения: {e}")
+            logger.error(f"Ошибка тестирования подключения: {e}")
             return False

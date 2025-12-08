@@ -19,7 +19,7 @@ logger = get_logger(__name__)
 
 async def simple_search_and_save():
     """Простой поиск и сохранение вакансий"""
-    logger.info("🎯 ПРОСТОЙ ПОИСК И СОХРАНЕНИЕ")
+    logger.info("ПРОСТОЙ ПОИСК И СОХРАНЕНИЕ")
     logger.info("=" * 50)
 
     # Инициализация БД
@@ -36,20 +36,20 @@ async def simple_search_and_save():
         "page": 0
     }
 
-    logger.info(f"🔍 Параметры поиска: {simple_params}")
+    logger.info(f"Параметры поиска: {simple_params}")
 
     # Поиск вакансий
     search_result = await client.search_vacancies(simple_params)
 
     if not search_result or not search_result.get('items'):
-        logger.error("❌ Не найдено вакансий даже с простыми параметрами!")
+        logger.error("Не найдено вакансий даже с простыми параметрами!")
         return False
 
-    logger.info(f"✅ Найдено вакансий: {len(search_result['items'])}")
+    logger.info(f"Найдено вакансий: {len(search_result['items'])}")
 
     # Получаем полные данные
     vacancies_data = await client.get_multiple_vacancies_details(search_result['items'])
-    logger.info(f"✅ Загружено полных данных: {len(vacancies_data)}")
+    logger.info(f"Загружено полных данных: {len(vacancies_data)}")
 
     # Сохраняем в БД
     saved_count = 0
@@ -57,22 +57,22 @@ async def simple_search_and_save():
         vacancy = await db.save_vacancy(vacancy_data)
         if vacancy:
             saved_count += 1
-            logger.info(f"💾 Сохранено: {vacancy_data['name']}")
+            logger.info(f"Сохранено: {vacancy_data['name']}")
         else:
-            logger.info(f"⏩ Дубликат: {vacancy_data['name']}")
+            logger.info(f"Дубликат: {vacancy_data['name']}")
 
-    logger.info(f"\n📊 ИТОГИ:")
-    logger.info(f"   Найдено: {len(vacancies_data)}")
-    logger.info(f"   Сохранено: {saved_count}")
-    logger.info(f"   Дубликатов: {len(vacancies_data) - saved_count}")
+    logger.info(f"\nИТОГИ:")
+    logger.info(f"  Найдено: {len(vacancies_data)}")
+    logger.info(f"  Сохранено: {saved_count}")
+    logger.info(f"  Дубликатов: {len(vacancies_data) - saved_count}")
 
     # Показываем сохраненные вакансии
     all_vacancies = await db.get_all_vacancies()
-    logger.info(f"\n📋 Всего в БД: {len(all_vacancies)} вакансий")
+    logger.info(f"\nВсего в БД: {len(all_vacancies)} вакансий")
 
     for i, vacancy in enumerate(all_vacancies[-5:]):  # Последние 5
-        status = "🆕" if not vacancy.processed else "📝"
-        logger.info(f"   {status} {vacancy.name} - {vacancy.company}")
+        status = "new" if not vacancy.processed else "done"
+        logger.info(f"  {status} {vacancy.name} - {vacancy.company}")
 
     return saved_count > 0
 
@@ -81,9 +81,9 @@ async def main():
     success = await simple_search_and_save()
 
     if success:
-        logger.info("\n✅ ПОИСК И СОХРАНЕНИЕ РАБОТАЮТ!")
+        logger.info("\nПОИСК И СОХРАНЕНИЕ РАБОТАЮТ!")
     else:
-        logger.error("\n❌ ЕСТЬ ПРОБЛЕМЫ С ПОИСКОМ!")
+        logger.error("\nЕСТЬ ПРОБЛЕМЫ С ПОИСКОМ!")
 
     return success
 

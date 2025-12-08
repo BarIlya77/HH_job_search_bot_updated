@@ -20,25 +20,25 @@ class Settings(BaseSettings):
     HH_CLIENT_SECRET: str = os.getenv("HH_CLIENT_SECRET", "")
     HH_API_URL: str = "https://api.hh.ru/vacancies"
 
-    # 🤖 DeepSeek API
+    #  DeepSeek API
     DEEPSEEK_API_KEY: str = os.getenv("DEEPSEEK_API_KEY", "")
     DEEPSEEK_API_URL: str = "https://api.deepseek.com/v1/chat/completions"
 
-    # 🗃️ Database
+    #  Database
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
 
-    # 📨 RabbitMQ
+    #  RabbitMQ
     RABBITMQ_URL: str = os.getenv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")
     QUEUE_VACANCIES: str = "vacancies_to_process"
     QUEUE_COVER_LETTERS: str = "cover_letters_to_send"
 
-    # ⚡ Rate Limits
+    #  Rate Limits
     REQUESTS_PER_HOUR: int = 15  # Откликов в час
     SEARCH_REQUESTS_PER_HOUR: int = 10  # Поисковых запросов в час
     MAX_CONCURRENT_REQUESTS: int = 2
     REQUEST_DELAY: float = 0.3
 
-    # 🔍 Search Parameters
+    #  Search Parameters
     SEARCH_QUERY: str = "Python разработчик OR Python developer OR backend Python"
     SEARCH_EMPLOYMENT: str = "remote,full,part"  # Удалёнка, полная, частичная
     SEARCH_SCHEDULE: str = "remote,flexible"
@@ -46,23 +46,23 @@ class Settings(BaseSettings):
     SEARCH_PER_PAGE: int = 20
     SEARCH_INTERVAL: int = 3600  # 1 час
 
-    # 🎯 Keywords для фильтрации Python вакансий
+    #  Keywords для фильтрации Python вакансий
     PYTHON_KEYWORDS: List[str] = [
         'python', 'питон', 'fastapi', 'django', 'flask',
         'backend', 'бэкенд', 'разработчик', 'developer'
     ]
 
-    # 📧 Контакты для писем
+    #  Контакты для писем
     CONTACT_NAME: str = os.getenv("CONTACT_NAME", "")
     CONTACT_TELEGRAM: str = os.getenv("CONTACT_TELEGRAM", "")
     CONTACT_EMAIL: str = os.getenv("CONTACT_EMAIL", "")
     CONTACT_PHONE: str = os.getenv("CONTACT_PHONE", "")
     CONTACT_GITHUB: str = os.getenv("CONTACT_GITHUB", "")
 
-    # 🤖 Режим работы бота
+    #  Режим работы бота
     BOT_MODE: str = os.getenv("BOT_MODE", "automatic")  # automatic или interactive
 
-    # 🎨 Logging
+    #  Logging
     LOG_LEVEL: str = "INFO"
     COLORED_LOGS: bool = True
 

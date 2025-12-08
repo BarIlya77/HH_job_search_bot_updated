@@ -22,7 +22,7 @@ class Database:
         """Создает таблицы при первом запуске"""
         async with self.engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        logger.info("✅ Таблицы БД созданы")
+        logger.info("Таблицы БД созданы")
 
     async def save_vacancy(self, vacancy_data):
         """Сохраняет вакансию если её ещё нет"""
@@ -35,7 +35,7 @@ class Database:
                 existing = result.scalar_one_or_none()
 
                 if existing:
-                    logger.info(f"⏩ Дубликат: {vacancy_data['name']}")
+                    logger.info(f"Дубликат: {vacancy_data['name']}")
                     return None
 
                 # Создаем новую вакансию
@@ -43,12 +43,12 @@ class Database:
                 session.add(vacancy)
                 await session.commit()
                 await session.refresh(vacancy)
-                logger.info(f"✅ Новая: {vacancy_data['name']}")
+                logger.info(f"Новая: {vacancy_data['name']}")
                 return vacancy
 
             except Exception as e:
                 await session.rollback()
-                logger.error(f"❌ Ошибка сохранения: {e}")
+                logger.error(f"Ошибка сохранения: {e}")
                 return None
 
     async def get_vacancy_by_hh_id(self, hh_id):
@@ -74,14 +74,14 @@ class Database:
                     vacancy.cover_letter = cover_letter_text
                     vacancy.cover_letter_generated_at = datetime.utcnow()
                     await session.commit()
-                    logger.info(f"✅ Письмо сохранено для ID: {vacancy_id}")
+                    logger.info(f"Письмо сохранено для ID: {vacancy_id}")
                     return True
                 else:
-                    logger.error(f"❌ Вакансия не найдена: {vacancy_id}")
+                    logger.error(f"Вакансия не найдена: {vacancy_id}")
                     return False
             except Exception as e:
                 await session.rollback()
-                logger.error(f"❌ Ошибка сохранения письма: {e}")
+                logger.error(f"Ошибка сохранения письма: {e}")
                 return False
 
     async def get_unprocessed_vacancies(self):
@@ -119,12 +119,12 @@ class Database:
                     vacancy.applied = True
                     vacancy.applied_at = datetime.utcnow()
                     await session.commit()
-                    logger.info(f"✅ Отправлена: {vacancy.name}")
+                    logger.info(f"Отправлена: {vacancy.name}")
                     return True
                 return False
             except Exception as e:
                 await session.rollback()
-                logger.error(f"❌ Ошибка отметки отправки: {e}")
+                logger.error(f"Ошибка отметки отправки: {e}")
                 return False
 
 

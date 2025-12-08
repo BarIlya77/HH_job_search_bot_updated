@@ -15,7 +15,7 @@ logger = get_logger(__name__)
 
 app = typer.Typer(
     name="hh-bot",
-    help="🤖 Автоматизация поиска работы на HH.ru",
+    help="Автоматизация поиска работы на HH.ru",
     rich_markup_mode="rich"
 )
 
@@ -23,7 +23,7 @@ app = typer.Typer(
 @app.command()
 def version():
     """Показать версию приложения"""
-    typer.echo(f"🚀 {settings.APP_NAME} v{settings.APP_VERSION}")
+    typer.echo(f"{settings.APP_NAME} v{settings.APP_VERSION}")
     typer.echo(f"👤 {settings.CONTACT_NAME}")
 
 
@@ -35,7 +35,7 @@ def config():
     
     console = Console()
     
-    table = Table(title="📋 Конфигурация HH Job Bot")
+    table = Table(title="Конфигурация HH Job Bot")
     table.add_column("Настройка", style="cyan")
     table.add_column("Значение", style="green")
     
@@ -45,9 +45,9 @@ def config():
     table.add_row("RABBITMQ_URL", settings.RABBITMQ_URL)
     table.add_row("SEARCH_QUERY", settings.SEARCH_QUERY)
     table.add_row("SEARCH_AREAS", str(settings.SEARCH_AREAS))
-    table.add_row("HH_ACCESS_TOKEN", "✅ Установлен" if settings.HH_ACCESS_TOKEN else "❌ Отсутствует")
-    table.add_row("HH_RESUME_ID", settings.HH_RESUME_ID or "❌ Отсутствует")
-    table.add_row("DEEPSEEK_API_KEY", "✅ Установлен" if settings.DEEPSEEK_API_KEY else "❌ Отсутствует")
+    table.add_row("HH_ACCESS_TOKEN", "Установлен" if settings.HH_ACCESS_TOKEN else "Отсутствует")
+    table.add_row("HH_RESUME_ID", settings.HH_RESUME_ID or "Отсутствует")
+    table.add_row("DEEPSEEK_API_KEY", "Установлен" if settings.DEEPSEEK_API_KEY else "Отсутствует")
     
     console.print(table)
 
@@ -64,8 +64,8 @@ def worker(
         from src.workers.sender_worker import main as sender_main
         asyncio.run(sender_main())
     else:
-        typer.echo(f"❌ Неизвестный тип воркера: {worker_type}")
-        typer.echo("💡 Доступные типы: vacancy, sender")
+        typer.echo(f"Неизвестный тип воркера: {worker_type}")
+        typer.echo("Доступные типы: vacancy, sender")
 
 
 @app.command()
@@ -73,15 +73,15 @@ def search():
     """Поиск новых вакансий"""
     from src.services.vacancy_searcher import search_new_vacancies
     
-    typer.echo("🔍 Поиск новых вакансий...")
+    typer.echo("Поиск новых вакансий...")
     result = asyncio.run(search_new_vacancies())
     
     if result.get('success'):
         stats = result.get('stats', {})
-        typer.echo(f"✅ Найдено: {stats.get('new_saved', 0)} новых вакансий")
-        typer.echo(f"📊 Отправлено в очередь: {stats.get('sent_to_queue', 0)}")
+        typer.echo(f"Найдено: {stats.get('new_saved', 0)} новых вакансий")
+        typer.echo(f"Отправлено в очередь: {stats.get('sent_to_queue', 0)}")
     else:
-        typer.echo(f"❌ Ошибка: {result.get('message', 'Unknown error')}")
+        typer.echo(f"Ошибка: {result.get('message', 'Unknown error')}")
 
 
 @app.command()
@@ -122,7 +122,7 @@ def status():
     
     console = Console()
     
-    table = Table(title="📊 Статус системы")
+    table = Table(title="Статус системы")
     table.add_column("Метрика", style="cyan")
     table.add_column("Значение", style="green")
     

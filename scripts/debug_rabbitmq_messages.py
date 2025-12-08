@@ -18,20 +18,20 @@ async def inspect_messages():
     rabbitmq = RabbitMQManager()
 
     if not await rabbitmq.connect():
-        logger.error("❌ Не удалось подключиться к RabbitMQ")
+        logger.error("Не удалось подключиться к RabbitMQ")
         return
 
     try:
-        # ✅ ПРАВИЛЬНЫЙ ВЫЗОВ
+        # ПРАВИЛЬНЫЙ ВЫЗОВ
         queue = await rabbitmq.channel.declare_queue(settings.QUEUE_COVER_LETTERS, passive=True)
         message_count = queue.declaration_result.message_count
-        logger.info(f"📊 Сообщений в очереди писем: {message_count}")
+        logger.info(f"Сообщений в очереди писем: {message_count}")
 
         if message_count > 0:
             # Получаем первое сообщение
             message = await queue.get(no_ack=False)  # no_ack=False чтобы не удалять сообщение
             if message:
-                logger.info("🔍 Диагностика сообщения:")
+                logger.info("Диагностика сообщения:")
                 logger.info(f"📦 Размер: {len(message.body)} байт")
 
                 # Пробуем разные кодировки
@@ -39,21 +39,21 @@ async def inspect_messages():
                 for encoding in encodings:
                     try:
                         decoded = message.body.decode(encoding)
-                        logger.info(f"✅ Успешно декодировано как {encoding}: {decoded[:100]}...")
+                        logger.info(f"Успешно декодировано как {encoding}: {decoded[:100]}...")
 
                         # Пробуем распарсить как JSON
                         import json
                         data = json.loads(decoded)
-                        logger.info(f"📋 JSON данные: {list(data.keys())}")
+                        logger.info(f"JSON данные: {list(data.keys())}")
                         break
                     except (UnicodeDecodeError, json.JSONDecodeError) as e:
-                        logger.info(f"❌ Не удалось декодировать как {encoding}: {e}")
+                        logger.info(f"Не удалось декодировать как {encoding}: {e}")
 
                 # Подтверждаем сообщение чтобы оно осталось в очереди
                 await message.ack()
 
     except Exception as e:
-        logger.error(f"❌ Ошибка диагностики: {e}")
+        logger.error(f"Ошибка диагностики: {e}")
     finally:
         await rabbitmq.close()
 

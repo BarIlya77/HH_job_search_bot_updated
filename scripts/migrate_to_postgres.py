@@ -26,7 +26,7 @@ async def get_sqlite_vacancies():
     # Используем существующий SQLite файл
     sqlite_path = Path("vacancies.db")
     if not sqlite_path.exists():
-        logger.error(f"❌ Файл БД не найден: {sqlite_path}")
+        logger.error(f"Файл БД не найден: {sqlite_path}")
         return []
     
     # Создаем движок для существующей SQLite БД
@@ -48,7 +48,7 @@ async def get_sqlite_vacancies():
             return vacancies
             
     except Exception as e:
-        logger.error(f"❌ Ошибка чтения SQLite: {e}")
+        logger.error(f"Ошибка чтения SQLite: {e}")
         return []
     finally:
         await sqlite_engine.dispose()
@@ -60,7 +60,7 @@ async def migrate_to_postgres(postgres_url: str):
     sqlite_vacancies = await get_sqlite_vacancies()
     
     if not sqlite_vacancies:
-        logger.error("❌ Нет данных для миграции")
+        logger.error("Нет данных для миграции")
         return
     
     # Подключаемся к PostgreSQL
@@ -106,20 +106,20 @@ async def migrate_to_postgres(postgres_url: str):
                     migrated_count += 1
                     
                 except Exception as e:
-                    logger.error(f"❌ Ошибка миграции вакансии {vacancy.hh_id}: {e}")
+                    logger.error(f"Ошибка миграции вакансии {vacancy.hh_id}: {e}")
             
             await session.commit()
-            logger.info(f"✅ Перенесено в PostgreSQL: {migrated_count} вакансий")
+            logger.info(f"Перенесено в PostgreSQL: {migrated_count} вакансий")
             
     except Exception as e:
-        logger.error(f"❌ Ошибка миграции: {e}")
+        logger.error(f"Ошибка миграции: {e}")
     finally:
         await postgres_engine.dispose()
 
 async def main():
     if len(sys.argv) != 2:
-        print("💡 Использование: python scripts/migrate_to_postgres.py postgresql+asyncpg://user:password@localhost/dbname")
-        print("💡 Пример: python scripts/migrate_to_postgres.py postgresql+asyncpg://postgres:password@localhost:5432/hh_bot")
+        print("Использование: python scripts/migrate_to_postgres.py postgresql+asyncpg://user:password@localhost/dbname")
+        print("Пример: python scripts/migrate_to_postgres.py postgresql+asyncpg://postgres:password@localhost:5432/hh_bot")
         return
     
     postgres_url = sys.argv[1]

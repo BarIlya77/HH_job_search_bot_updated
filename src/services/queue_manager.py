@@ -20,7 +20,7 @@ class RabbitMQManager:
         """Подключение к RabbitMQ с повторными попытками"""
         for attempt in range(max_retries):
             try:
-                logger.info(f"🔌 Попытка подключения к RabbitMQ ({attempt + 1}/{max_retries})...")
+                logger.info(f"Попытка подключения к RabbitMQ ({attempt + 1}/{max_retries})...")
                 self.connection = await aio_pika.connect_robust(settings.RABBITMQ_URL)
                 self.channel = await self.connection.channel()
 
@@ -32,22 +32,22 @@ class RabbitMQManager:
                 await self.channel.declare_queue(settings.QUEUE_COVER_LETTERS, durable=True)
 
                 self.is_connected = True
-                logger.info("✅ Подключение к RabbitMQ установлено")
+                logger.info("Подключение к RabbitMQ установлено")
                 return True
 
             except Exception as e:
-                logger.error(f"❌ Попытка {attempt + 1}/{max_retries} не удалась: {e}")
+                logger.error(f"Попытка {attempt + 1}/{max_retries} не удалась: {e}")
                 if attempt < max_retries - 1:
-                    logger.info("🔄 Повторная попытка через 5 секунд...")
+                    logger.info("Повторная попытка через 5 секунд...")
                     await asyncio.sleep(5)
 
-        logger.error("❌ Не удалось подключиться к RabbitMQ после всех попыток")
+        logger.error("Не удалось подключиться к RabbitMQ после всех попыток")
         return False
 
     async def ensure_connection(self) -> bool:
         """Проверяет и восстанавливает соединение при необходимости"""
         if not self.is_connected or (self.connection and self.connection.is_closed):
-            logger.warning("🔌 Восстановление соединения с RabbitMQ...")
+            logger.warning("Восстановление соединения с RabbitMQ...")
             return await self.connect()
         return True
 
@@ -67,11 +67,11 @@ class RabbitMQManager:
                 message,
                 routing_key=settings.QUEUE_VACANCIES
             )
-            logger.info(f"📤 Вакансия отправлена в очередь: {vacancy_data['name']}")
+            logger.info(f"Вакансия отправлена в очередь: {vacancy_data['name']}")
             return True
 
         except Exception as e:
-            logger.error(f"❌ Ошибка отправки в очередь: {e}")
+            logger.error(f"Ошибка отправки в очередь: {e}")
             self.is_connected = False
             return False
 
@@ -91,11 +91,11 @@ class RabbitMQManager:
                 message,
                 routing_key=settings.QUEUE_COVER_LETTERS
             )
-            logger.info("📤 Сопроводительное письмо отправлено в очередь отправки")
+            logger.info("Сопроводительное письмо отправлено в очередь отправки")
             return True
 
         except Exception as e:
-            logger.error(f"❌ Ошибка отправки письма в очередь: {e}")
+            logger.error(f"Ошибка отправки письма в очередь: {e}")
             self.is_connected = False
             return False
 
@@ -104,7 +104,7 @@ class RabbitMQManager:
         if self.connection:
             await self.connection.close()
             self.is_connected = False
-            logger.info("🔌 Соединение с RabbitMQ закрыто")
+            logger.info("Соединение с RabbitMQ закрыто")
 
     async def get_queue_stats(self) -> Dict[str, int]:
         """Получает статистику по очередям"""
@@ -125,5 +125,5 @@ class RabbitMQManager:
             return stats
 
         except Exception as e:
-            logger.error(f"❌ Ошибка получения статистики очередей: {e}")
+            logger.error(f"Ошибка получения статистики очередей: {e}")
             return {}

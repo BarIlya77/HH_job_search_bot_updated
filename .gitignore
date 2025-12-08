@@ -61,4 +61,3 @@ tmp/
 /src/workers/sender_worker_old2.py
 /src/workers/sender_worker_old_ver.py
 /.env
-/docker-compose.yml
