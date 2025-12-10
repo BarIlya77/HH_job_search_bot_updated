@@ -40,8 +40,9 @@ class Settings(BaseSettings):
 
     #  Search Parameters
     SEARCH_QUERY: str = "Python разработчик OR Python developer OR backend Python"
-    SEARCH_EMPLOYMENT: str = "remote,full,part"  # Удалёнка, полная, частичная
-    SEARCH_SCHEDULE: str = "remote,flexible"
+    SEARCH_EMPLOYMENT: list[str] = ["full", "part"]  # полная, частичная
+    SEARCH_SCHEDULE: list[str] = ["remote"]
+    SEARCH_WORK_FORMAT: str = "REMOTE, HYBRID"
     SEARCH_AREAS: List[int] = [1, 2, 113]  # Москва, СПб, Россия
     SEARCH_PER_PAGE: int = 20
     SEARCH_INTERVAL: int = 3600  # 1 час

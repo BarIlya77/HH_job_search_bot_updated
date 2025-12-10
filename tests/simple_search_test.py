@@ -26,6 +26,8 @@ async def main():
     logger.info(f"Параметры из config:")
     logger.info(f"  SEARCH_QUERY: {settings.SEARCH_QUERY}")
     logger.info(f"  SEARCH_AREAS: {settings.SEARCH_AREAS}")
+    logger.info(f"  SEARCH_EMPLOYMENT: {settings.SEARCH_EMPLOYMENT}")
+    logger.info(f"  SEARCH_SCHEDULE: {settings.SEARCH_SCHEDULE}")
     logger.info(f"  SEARCH_PER_PAGE: {settings.SEARCH_PER_PAGE}")
 
     # Инициализация БД

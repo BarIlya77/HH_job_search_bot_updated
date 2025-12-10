@@ -45,7 +45,11 @@ class HHClient:
         """Поиск вакансий по заданным параметрам"""
         params = {
             "text": settings.SEARCH_QUERY,
+            "search_field": "name",
             "area": settings.SEARCH_AREAS,
+            "employment": settings.SEARCH_EMPLOYMENT,
+            "schedule": settings.SEARCH_SCHEDULE,
+            "resume_work_format": settings.SEARCH_WORK_FORMAT,
             "per_page": settings.SEARCH_PER_PAGE,
             "page": 0,
             "order_by": "publication_time",
